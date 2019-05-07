@@ -36,7 +36,6 @@ server.post('/api/login', async(req, res) => {
         if (!user || !bcrypt.compareSync(credentials.password, user.password)) {
             return res.status(401).json({ error: 'Incorrect Credentials'})
         }
-
         // const result = await db('users').where
         res.status(202).json({message: 'Welcome!'})
     } catch(err) {

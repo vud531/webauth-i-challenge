@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    
     "start": "nodemon index.js"
   },
   "repository": {
@@ -25,6 +24,7 @@
     "express": "^4.16.4",
     "helmet": "^3.18.0",
     "knex": "^0.16.5",
+    "pug": "^2.0.3",
     "sqlite3": "^4.0.6"
   },
   "devDependencies": {
