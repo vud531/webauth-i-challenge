@@ -14,7 +14,7 @@ server.post('/api/register', async(req, res) => {
     try {
 
         const credentials = req.body
-        const hash = bcrypt.hashSync(credentials.password, 14)
+        const hash = bcrypt.hashSync(credentials.password, 5)
         credentials.password = hash
         const id = await db('users').insert(credentials)
     
@@ -36,8 +36,23 @@ server.post('/api/login', async(req, res) => {
             return res.status(401).json({ error: 'Incorrect Credentials'})
         }
 
-        const result = await db('posts')
-        res.status(202).json(result)
+        // const result = await db('users').where
+        res.status(202).json({message: 'Welcome!'})
+    } catch(err) {
+        res.status(500).json({ error: err.message})
+    }
+})
+
+server.get('/api/users', async(req, res) => {
+    try {
+        const credentials = req.body
+        const user = await db('users').where('username', credentials.username).first()
+        if (!user || !bcrypt.compareSync(credentials.password, user.password)) {
+            return res.status(401).json({ error: 'Incorrect Credentials'})
+        }
+
+        const result = await db('users')
+        res.status(202).json(result).json(result)
     } catch(err) {
         res.status(500).json({ error: err.message})
     }
