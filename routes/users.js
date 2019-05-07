@@ -1,31 +1,32 @@
 const express = require('express')
+const bcrypt = require('bcryptjs');
+
 const router = express.Router()
 
 const users = require('../models/users')
+const restricted = require('../middlewares/restrictionHandler')
 
 
-router.post('/api/register', async(req, res) => {
+router.post('/register', async(req, res) => {
     try {
 
         const credentials = req.body
         const hash = bcrypt.hashSync(credentials.password, 5)
         credentials.password = hash
-        const id = await db('users').insert(credentials)
-    
-        const result = await db('users')
-        .where({ id })
-        .first()
-    
+        const result = await users.add(credentials)
+        req.session.name = 'Frodo';
+
         res.status(201).json(result)
     } catch(err) {
         res.status(500).json({ error: err.message})
     }
 })
 
-router.post('/api/login', async(req, res) => {
+router.get('/login', restricted, async(req, res) => {
     try {
         const credentials = req.body
-        const user = await db('users').where('username', credentials.username).first()
+        const { username } = credentials
+        const user = await users.findBy({username})
         if (!user || !bcrypt.compareSync(credentials.password, user.password)) {
             return res.status(401).json({ error: 'Incorrect Credentials'})
         }
@@ -36,12 +37,26 @@ router.post('/api/login', async(req, res) => {
     }
 })
 
-router.get('/api/users', restricted, async (req, res) => {
+router.get('/greet', (req, res) => {
+    const name = req.session.name;
+    console.log(name)
+    if (name) {
+        res.send(`hello ${req.session.name}`);
+    }
+    
+    res.status(404).send({message: "user not loged in"})
+
+});
+
+router.get('/', restricted, async (req, res) => {
     try {
-        const result = await db('users')
+        const result = await users.all()
         res.status(202).json(result)
+        
     }
     catch(err) {
         res.status(500).json({ error: err.message})
     }
 });
+
+module.exports = router
