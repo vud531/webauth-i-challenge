@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const router = express.Router()
 
-const users = require('../models/users')
+const Users = require('../models/users')
 const restricted = require('../middlewares/restrictionHandler')
 
 
@@ -14,7 +14,7 @@ router.post('/register', async(req, res) => {
         const hash = bcrypt.hashSync(credentials.password, 5)
         credentials.password = hash
         const result = await users.add(credentials)
-        req.session.name = 'Frodo';
+        req.session.username = credentials.username;
 
         res.status(201).json(result)
     } catch(err) {
@@ -22,17 +22,21 @@ router.post('/register', async(req, res) => {
     }
 })
 
-router.get('/login', async(req, res) => {
+router.post('/login', async (req, res) => {
     try {
         const credentials = req.body
         const { username } = credentials
-        const user = await users.findBy({username})
-        if (!user || !bcrypt.compareSync(credentials.password, user.password)) {
-            return res.status(401).json({ error: 'Incorrect Credentials'})
+        const user = await Users.findBy({username})
+        if (user || bcrypt.compareSync(credentials.password, user.password)) {
+            
+        req.session.username = user.username
+        console.log(req.session)
+        res.status(202).json({message: 'Welcome!' + user.username})
+        } else {
+            res.status(401).json({ error: 'Incorrect Credentials'})
         }
         // const result = await db('users').where
-        req.session.username = user.username
-        res.status(202).json({message: 'Welcome!'})
+
     } catch(err) {
         res.status(500).json({ error: err.message})
     }

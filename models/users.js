@@ -2,8 +2,8 @@ const db = require('../data/dbConfig')
 const model = 'users'
 
 module.exports = {
-    add: user => {
-        const id = db(model).insert(user)
+    add: async(user) => {
+        const id = await db(model).insert(user)
     
         return findBy({id})
     },
